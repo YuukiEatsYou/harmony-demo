@@ -475,7 +475,11 @@ body.site {
   font-family: var(--h-mono);
   font-size: .85rem;
   line-height: 1.7;
-  white-space: pre;
+  /* Wrap long commands instead of forcing the grid track (and the whole
+     page) to grow. `anywhere` also lets unbreakable tokens like
+     HARMONY_COOKIE_SECURE=true break, so nothing can blow out the layout. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .site .copy {
