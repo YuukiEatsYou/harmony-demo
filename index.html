@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>document.documentElement.className += ' js';</script>
+  <title>Harmony - a chat server you run yourself</title>
+  <meta name="description" content="Self-hosted Discord alternative with a built-in bridge, so nobody has to leave Discord behind. Channels, roles, reactions, custom emoji, images and video. All on a machine you own.">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#12151a">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Harmony - a chat server you run yourself">
+  <meta property="og:description" content="Self-hosted Discord alternative with a built-in bridge, so nobody has to leave Discord behind.">
+  <meta property="og:image" content="icon.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+
+  <!--
+    Harmony's own stylesheet. A bundled mirror (harmony.css) loads first so the
+    page is styled immediately and works offline; the small script below then
+    refreshes it from the upstream URL, so the site always tracks the app's CSS.
+  -->
+  <link id="harmony-local" rel="stylesheet" href="harmony.css">
+  <link id="site-css" rel="stylesheet" href="site.css">
+
+  <script>
+    (function () {
+      var REMOTE = 'https://raw.githubusercontent.com/YuukiEatsYou/harmony/refs/heads/main/apps/web/src/app.css';
+      var local = document.getElementById('harmony-local');
+      var site = document.getElementById('site-css');
+      fetch(REMOTE)
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error(String(r.status))); })
+        .then(function (css) {
+          var style = document.createElement('style');
+          style.id = 'harmony-remote';
+          style.textContent = css;
+          // Sit before site.css so our overrides still win by order.
+          document.head.insertBefore(style, site);
+          // The fresh upstream copy now supersedes the bundled mirror.
+          if (local) local.disabled = true;
+        })
+        .catch(function () { /* keep the bundled mirror */ });
+    })();
+  </script>
+</head>
+<body class="site">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="#top">
+        <img src="icon.png" alt="">
+        <span>Harmony</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="nav-link" href="#features">Why Harmony</a>
+        <a class="nav-link" href="#demo">Live demo</a>
+        <a class="nav-link" href="#install">Install</a>
+        <a class="nav-link" href="https://github.com/YuukiEatsYou/harmony">GitHub</a>
+        <a class="button-link" href="#install">Get started</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="top">
+      <div class="wrap">
+        <div class="hero-copy">
+          <h1>A chat server you actually own.</h1>
+          <p class="hero-sub">
+            Channels, roles, reactions, custom emoji, images and video. Everything a small
+            community used from Discord, running on a machine you control. A built-in bridge
+            keeps Discord in the loop, so nobody has to leave.
+          </p>
+          <div class="hero-cta">
+            <a class="button-link" href="#demo">Try the live demo</a>
+            <a class="btn-ghost" href="#install">Install in 2 minutes</a>
+          </div>
+          <div class="pills">
+            <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>AGPL-3.0</span>
+            <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Single process</span>
+            <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>No Docker</span>
+            <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Discord bridge</span>
+            <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Installs as an app</span>
+          </div>
+        </div>
+        <div class="hero-art">
+          <img src="icon.png" alt="The Harmony logo: three stacked smiling faces">
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= WHY ================= -->
+    <section class="sec" id="features">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <h2 class="sec-title">Why Harmony</h2>
+          <p class="sec-lede">A familiar interface for a small community, without handing the community to a platform.</p>
+        </div>
+
+        <div class="feats">
+          <article class="feat reveal">
+            <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <h3>You own it</h3>
+            <p>Messages, images and member data live on your hardware under your rules. No ID verification, no ads, no analytics, no terms of service but your own.</p>
+          </article>
+
+          <article class="feat reveal">
+            <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h12l-3-3"/><path d="M16 17H4l3 3"/></svg></div>
+            <h3>Migrating doesn't mean leaving</h3>
+            <p>The bridge mirrors messages, replies, reactions, edits and deletes both ways with Discord. The setup wizard imports your channels and custom emoji for you.</p>
+          </article>
+
+          <article class="feat reveal">
+            <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></div>
+            <h3>Small on purpose</h3>
+            <p>One process and one folder you can back up. No database server, no Docker, no cloud account. It fits on a Raspberry Pi or the cheapest VPS.</p>
+          </article>
+
+          <article class="feat reveal">
+            <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="11.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="13.5" r="1.5"/><path d="M12 22a10 10 0 1 1 10-10c0 3-2 4-4 4h-1a2 2 0 0 0-1 3.7A2 2 0 0 1 14 22z"/></svg></div>
+            <h3>Feels like home</h3>
+            <p>Pick a background and an accent colour and the whole interface follows. Install it to a phone or desktop home screen like a real app.</p>
+          </article>
+        </div>
+
+        <div class="status reveal">
+          <strong style="color:var(--h-text)">What it isn't.</strong>
+          There is no voice or video chat, no direct messages and no friend list. One instance is one
+          server. It is built to be <em>a</em> home for <em>a</em> community, not a platform.
+        </div>
+
+        <h3 style="margin:2.75rem 0 1rem;font-size:1.05rem">Everything a small server needs</h3>
+        <div class="pills" style="margin-top:0">
+          <span class="pill">Channels &amp; categories</span>
+          <span class="pill">Roles &amp; permissions</span>
+          <span class="pill">Replies</span>
+          <span class="pill">Emoji reactions</span>
+          <span class="pill">Polls</span>
+          <span class="pill">Custom emoji</span>
+          <span class="pill">Images &amp; video</span>
+          <span class="pill">Invites</span>
+          <span class="pill">Per-channel slowmode</span>
+          <span class="pill">Search with filters</span>
+          <span class="pill">Notification sounds</span>
+          <span class="pill">Timeouts &amp; bans</span>
+          <span class="pill">Admin panel</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= DEMO ================= -->
+    <section class="sec alt" id="demo">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <h2 class="sec-title">See it in action</h2>
+          <p class="sec-lede">
+            Everything below is the real interface, down to the markup and icons. Switch channels,
+            react, reply, open a profile, or write a message. Nothing leaves your browser.
+          </p>
+        </div>
+
+        <div class="demo-frame reveal" id="frame">
+          <div class="layout">
+            <aside class="sidebar" id="sidebar">
+              <button class="server-name" type="button" title="About this instance">
+                <img class="server-icon" src="icon.png" alt="">
+                <span class="server-name-text">Harmony Demo</span>
+              </button>
+              <nav class="channels" id="channels"></nav>
+              <footer class="user-bar">
+                <button class="user-button" type="button" title="Edit your profile" data-u="nova">
+                  <span class="avatar small fallback">N</span>
+                  <span class="username">Nova</span>
+                </button>
+                <div class="user-actions">
+                  <button class="link" type="button">Log out</button>
+                </div>
+              </footer>
+            </aside>
+
+            <section class="chat" id="chat" aria-label="#general">
+              <header class="chat-header">
+                <button class="drawer-toggle" id="toggle-channels" type="button" aria-label="Show channels" aria-expanded="false">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="20" height="20"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+                </button>
+                <span class="chat-title" id="title"># general</span>
+                <button type="button" class="inbox-open" aria-label="Mentions and replies" title="Mentions and replies">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="20" height="20"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13h4l2 3h4l2-3h4"/></svg>
+                </button>
+                <div class="header-actions">
+                  <button type="button" class="header-menu-toggle" aria-label="Channel actions" title="Channel actions" aria-haspopup="menu" aria-expanded="false">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="20" height="20"><path d="M5.5 12h.01" stroke-width="3"/><path d="M12 12h.01" stroke-width="3"/><path d="M18.5 12h.01" stroke-width="3"/></svg>
+                  </button>
+                </div>
+                <button type="button" class="search-open" aria-label="Search messages" title="Search messages">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="20" height="20"><circle cx="11" cy="11" r="7"/><path d="M16.2 16.2 21 21"/></svg>
+                </button>
+                <button class="drawer-toggle" id="toggle-members" type="button" aria-label="Show members" aria-expanded="false">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="20" height="20"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.8"/><path d="M17 14.2A5.5 5.5 0 0 1 20.5 19"/></svg>
+                </button>
+              </header>
+              <div class="messages" id="messages"></div>
+              <div class="composer">
+                <div id="replying"></div>
+                <form id="form" autocomplete="off">
+                  <button type="button" class="attach attach-more" title="More actions" aria-label="More actions" aria-haspopup="menu" aria-expanded="false">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="20" height="20"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                  </button>
+                  <button type="button" class="attach" title="Add emoji" aria-label="Add emoji">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="20" height="20"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9.5 9.75h.01"/><path d="M14.5 9.75h.01"/></svg>
+                  </button>
+                  <button type="button" class="attach attach-gif" title="Add gif" aria-label="Add gif">GIF</button>
+                  <input class="file-input" type="file" multiple accept="image/png,image/jpeg,image/gif,image/webp,video/mp4">
+                  <textarea class="text-input" id="input" rows="1" placeholder="Message #general" autocomplete="off" autocorrect="off" enterkeyhint="send" aria-label="Message"></textarea>
+                  <button type="button" class="schedule-trigger" title="Schedule send (Ctrl+Shift+Enter)" aria-label="Schedule send" aria-haspopup="dialog" aria-expanded="false">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="16" height="16"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <button type="submit" class="send" aria-label="Send">
+                    <span class="send-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="20" height="20"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></span>
+                  </button>
+                </form>
+              </div>
+            </section>
+
+            <aside class="roster" id="roster" aria-label="Members"></aside>
+          </div>
+        </div>
+        <noscript><p class="demo-note" style="margin-top:.85rem">Enable JavaScript to play with the live demo.</p></noscript>
+      </div>
+    </section>
+
+    <!-- ================= INSTALL ================= -->
+    <section class="sec" id="install">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <h2 class="sec-title">Install</h2>
+          <p class="sec-lede">You need <a href="https://nodejs.org">Node.js 24 or newer</a>. That is the only dependency.</p>
+        </div>
+
+        <ol class="steps">
+          <li class="reveal">
+            <h3>Run it locally</h3>
+            <p>From the project folder:</p>
+            <div class="term"><span class="term-code">npm install
+npm run dev</span><button class="copy" type="button">Copy</button></div>
+            <p>Open <code>http://127.0.0.1:5173</code> and register. It listens on loopback only, so nobody else can reach it yet.</p>
+          </li>
+
+          <li class="reveal">
+            <h3>Create the owner account</h3>
+            <p>The first account you register becomes the owner, and a short wizard asks for a name and colours, storage settings, and whether to import from Discord.</p>
+            <div class="status" style="margin:.5rem 0 0">
+              Do this before the instance is reachable from the internet. Until then, anyone who can reach it can claim the owner account.
+            </div>
+          </li>
+
+          <li class="reveal">
+            <h3>Build for production</h3>
+            <p>One Node process serves the client, the API and the WebSocket gateway. All state lives in <code>data/</code>.</p>
+            <div class="term"><span class="term-code">npm ci
+npm run build:web
+npm start</span><button class="copy" type="button">Copy</button></div>
+          </li>
+
+          <li class="reveal">
+            <h3>Put it behind HTTPS</h3>
+            <p>Point a reverse proxy at <code>127.0.0.1:8787</code>. With Caddy, certificates and WebSockets are handled for you:</p>
+            <div class="term"><span class="term-code">chat.example.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8787
+}</span><button class="copy" type="button">Copy</button></div>
+            <p>Then set these in <code>.env</code> and restart:</p>
+            <div class="term"><span class="term-code">HARMONY_TRUST_PROXY=true
+HARMONY_COOKIE_SECURE=true</span><button class="copy" type="button">Copy</button></div>
+          </li>
+
+          <li class="reveal">
+            <h3>Back it up</h3>
+            <p>Everything that matters is in <code>data/</code>. Copy it while stopped, or take a consistent copy while running:</p>
+            <div class="term"><span class="term-code">sqlite3 data/harmony.db ".backup '/backup/harmony.db'"
+cp -a data/uploads /backup/uploads</span><button class="copy" type="button">Copy</button></div>
+          </li>
+        </ol>
+
+        <h3 style="margin:2.5rem 0 .3rem;font-size:1.05rem">Useful settings</h3>
+        <table>
+          <thead>
+            <tr><th>Variable</th><th>Default</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>HARMONY_PORT</code></td><td><code>8787</code></td><td>Port to listen on.</td></tr>
+            <tr><td><code>HARMONY_DATA_DIR</code></td><td><code>./data</code></td><td>Where the database and uploads live.</td></tr>
+            <tr><td><code>HARMONY_REQUIRE_INVITE</code></td><td><code>false</code></td><td>Require an invite code to register.</td></tr>
+            <tr><td><code>HARMONY_SESSION_TTL_DAYS</code></td><td><code>30</code></td><td>How long a login lasts.</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sec-lede" style="margin:1.5rem 0 0">
+          The full guide covers nginx, systemd, updates and the Discord bridge in
+          <a href="https://github.com/YuukiEatsYou/harmony/blob/main/docs/DEPLOYMENT.md">docs/DEPLOYMENT.md</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= CTA ================= -->
+    <section class="cta-band">
+      <div class="wrap">
+        <h2 class="sec-title">Give your community a home you control.</h2>
+        <p class="sec-lede" style="max-width:56ch;margin:0 auto">
+          One process, one folder, one SQLite file. Back it up by copying <code>data/</code>.
+        </p>
+        <div class="hero-cta">
+          <a class="button-link" href="#install">Install in 2 minutes</a>
+          <a class="btn-ghost" href="https://github.com/YuukiEatsYou/harmony">View on GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span class="foot-brand"><img src="icon.png" alt=""> Harmony</span>
+      <span>Free software under the <a href="https://github.com/YuukiEatsYou/harmony/blob/main/LICENSE">AGPL-3.0</a>.</span>
+      <span>
+        <a href="https://github.com/YuukiEatsYou/harmony">GitHub</a> ·
+        <a href="https://github.com/YuukiEatsYou/harmony/blob/main/docs/DEPLOYMENT.md">Deployment</a> ·
+        <a href="https://github.com/YuukiEatsYou/harmony/blob/main/docs/TECHNICAL.md">Technical</a> ·
+        <a href="https://github.com/YuukiEatsYou/harmony/blob/main/docs/API.md">API</a>
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var ME = 'nova';
+
+      // ---- The members in the demo, mirroring the app's own shape ----
+
+      var ROLES = {
+        owner:     { label: 'Owner',         color: '#e0a63a', icon: 'crown' },
+        admin:     { label: 'Administrator', color: '#e0575f', icon: 'sword' },
+        moderator: { label: 'Moderator',     color: '#57b0e0', icon: 'shield' },
+        member:    { label: 'Member',        color: null }
+      };
+
+      var USERS = {
+        sam:  { name: 'Sam',  username: 'sam',  role: 'owner',     online: true,  since: '12 Mar 2023', roles: [['Owner', '#e0a63a']] },
+        kai:  { name: 'Kai',  username: 'kai',  role: 'admin',     online: true,  since: '4 Jun 2023',   roles: [['Admin', '#e0575f']] },
+        luna: { name: 'Luna', username: 'luna', role: 'moderator', online: true,  since: '21 Sep 2023',  roles: [['Moderator', '#57b0e0']] },
+        bea:  { name: 'Bea',  username: 'bea',  role: 'member',    online: true,  since: '2 Jan 2024',   roles: [['Member', null]] },
+        ravi: { name: 'Ravi', username: 'ravi', role: 'member',    online: false, since: '18 Apr 2024',  discordId: '248172004998217728', roles: [['Member', null]] },
+        nova: { name: 'Nova', username: 'nova', role: 'member',    online: true,  since: 'Today',        roles: [['Member', null]] }
+      };
+
+      var CATS = [
+        { id: 'c-welcome', name: 'Welcome', channels: [
+          { id: 'welcome',       name: 'welcome' },
+          { id: 'rules',         name: 'rules', locked: true },
+          { id: 'announcements', name: 'announcements', unread: true, mention: 2 }
+        ]},
+        { id: 'c-hangout', name: 'Hangout', channels: [
+          { id: 'general',       name: 'general' },
+          { id: 'introductions', name: 'introductions' },
+          { id: 'memes',         name: 'memes', unread: true },
+          { id: 'pets',          name: 'pets' }
+        ]},
+        { id: 'c-games', name: 'Games', channels: [
+          { id: 'gaming',      name: 'gaming' },
+          { id: 'minecraft',   name: 'minecraft' },
+          { id: 'game-night',  name: 'game-night' }
+        ]},
+        { id: 'c-watch', name: 'Anime & TV', channels: [
+          { id: 'anime',         name: 'anime' },
+          { id: 'movies-and-tv', name: 'movies-and-tv' }
+        ]},
+        { id: 'c-bridge', name: 'Discord Bridge', channels: [
+          { id: 'discord-bridge', name: 'discord-bridge', discord: true }
+        ]}
+      ];
+
+      var MSGS = {
+        welcome: [
+          { u: 'sam',  t: '9:00 AM', x: 'Welcome to Harmony Demo! 🎮 Make yourself at home! Say hi in #introductions and grab your roles.', r: [['👋', 6], ['🎮', 4]] },
+          { u: 'luna', t: '9:01 AM', x: 'House rules live in #rules. The big one: no spoilers without a warning 😌', r: [['👌', 3]] },
+          { u: 'sam',  t: '9:02 AM', x: 'Anything on your mind? #general is where we all hang out.' }
+        ],
+        rules: [
+          { u: 'sam', t: '8:30 AM', x: '1. Be kind, no drama.\n2. Keep spoilers behind a spoiler tag.\n3. No spam or self-promo (unless it is Friday).\n4. Have fun 🌟', r: [['👍', 11]] }
+        ],
+        announcements: [
+          { u: 'sam',  t: 'Yesterday', x: '**We moved!** 🎉 Harmony Demo runs on our own little setup now instead of Discord. Same channels, same people and anyone still on Discord can chat with us right here.', r: [['🎉', 9], ['🫶', 6]] },
+          { u: 'luna', t: 'Yesterday', x: 'Movie night is Saturday at 8! Vote for the film in #movies-and-tv 🍿', r: [['🍿', 5], ['🗳️', 3]] }
+        ],
+        general: [
+          { u: 'kai',  t: '8:58 AM', x: 'morning ☕ anyone else awake yet', r: [['☕', 3]] },
+          { u: 'luna', t: '9:02 AM', x: 'barely. stayed up way too late finishing that show' },
+          { u: 'bea',  t: '9:05 AM', x: 'worth it though right? no spoilers, promise', r: [['🙏', 2]] },
+          { u: 'luna', t: '9:06 AM', x: 'so worth it 🙌' },
+          { u: 'kai',  t: '9:10 AM', x: 'anyone up for game night later? thinking co-op', r: [['👀', 4], ['🎮', 3]] },
+          { u: 'bea',  t: '9:11 AM', x: "I'm in! what are we playing", reply: { u: 'kai', text: 'anyone up for game night later? thinking co-op' } },
+          { u: 'kai',  t: '9:12 AM', x: 'open to ideas. just nothing too sweaty' },
+          { u: 'bea',  t: '9:13 AM', x: '@luna you joining?' },
+          { u: 'luna', t: '9:14 AM', x: 'yes!! just not *that* game again 😭', r: [['😭', 3], ['💀', 2]] },
+          { u: 'kai',  t: '9:15 AM', x: 'noted 😂 new rule: we never speak of it', r: [['😂', 5], ['🤐', 3]] },
+          { u: 'kai',  t: '9:15 AM', x: 'also: bring snacks 🍫' },
+          { u: 'luna', t: '9:16 AM', x: '@nova welcome!! 👋 game night is a great place to start', r: [['👋', 3]] }
+        ],
+        introductions: [
+          { u: 'sam', t: 'Tuesday', x: 'New here? Drop a hi and one thing you are into 👋', r: [['👋', 4]] },
+          { u: 'bea', t: 'Tuesday', x: 'hi! I draw a lot and lose at basically every game we play', r: [['😂', 3]] }
+        ],
+        memes: [
+          { u: 'bea',  t: 'Yesterday', x: 'saw this and immediately thought of luna', r: [['💀', 7], ['😂', 5]] },
+          { u: 'luna', t: 'Yesterday', x: 'why is it so accurate', r: [['😭', 3]] }
+        ],
+        pets: [
+          { u: 'bea', t: 'Saturday', x: 'cat tax 🐈', r: [['😻', 5]] },
+          { u: 'sam', t: 'Saturday', x: 'a perfect little loaf', r: [['🍞', 3]] }
+        ],
+        gaming: [
+          { u: 'kai',  t: '9:20 AM', x: 'what is everyone playing this week?', r: [['🎮', 2]] },
+          { u: 'bea',  t: '9:22 AM', x: 'replaying an old favourite. comfort game hours' },
+          { u: 'luna', t: '9:25 AM', x: 'the same thing i always play, i have a problem', r: [['😂', 4]] }
+        ],
+        minecraft: [
+          { u: 'bea', t: 'Monday', x: 'our base finally looks like a base 🏡 if anyone wants to visit:\n```\n/tp 812 -60 -344\n```', r: [['🏡', 3], ['🥹', 2]] },
+          { u: 'sam', t: 'Monday', x: 'that nether portal is doing the most 😂', r: [['😂', 3]] }
+        ],
+        'game-night': [
+          { u: 'kai',  t: 'Friday', x: 'game night tonight at 8! party games only, no skill required 😄', r: [['🎮', 8], ['🎉', 5]] },
+          { u: 'luna', t: 'Friday', x: 'bringing the chaos', r: [['😂', 3]] }
+        ],
+        anime: [
+          { u: 'luna', t: 'Sunday', x: 'just finished episode 4 and i have THOUGHTS', r: [['👀', 4]] },
+          { u: 'bea',  t: 'Sunday', x: 'without spoiling anything, is it worth starting?', reply: { u: 'luna', text: 'just finished episode 4 and i have THOUGHTS' } },
+          { u: 'luna', t: 'Sunday', x: 'yes, but give it three episodes. and do not touch the ||post-credits scene|| until you catch up', r: [['🤐', 2]] },
+          { u: 'bea',  t: 'Sunday', x: 'noted, starting tonight 🍿' }
+        ],
+        'movies-and-tv': [
+          { u: 'kai', t: 'Yesterday', x: 'the new trailer just dropped and it looks so good', r: [['🔥', 6]], embed: true },
+          { u: 'sam', t: 'Yesterday', x: 'Saturday cannot come soon enough 🍿', r: [['🍿', 4]] }
+        ],
+        'discord-bridge': [
+          { u: 'kai',  t: 'Monday', x: 'for anyone still on Discord: this channel is shared. post on either side and it shows up on both 👌', r: [['🔁', 5]] },
+          { u: 'ravi', t: 'Monday', x: 'hello from Discord! can you all see this? 👋' },
+          { u: 'sam',  t: 'Monday', x: 'loud and clear ravi 🎉', r: [['🎉', 3], ['👋', 2]] }
+        ]
+      };
+
+      var CHANNELS = {};
+      CATS.forEach(function (cat) {
+        cat.channels.forEach(function (ch) { CHANNELS[ch.id] = ch; });
+      });
+
+      // ---- Icons, copied from the app's Icon.svelte ----
+
+      var ICONS = {
+        chevron: '<path d="m6 9 6 6 6-6"/>',
+        more: '<path d="M5.5 12h.01" stroke-width="3"/><path d="M12 12h.01" stroke-width="3"/><path d="M18.5 12h.01" stroke-width="3"/>',
+        link: '<path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/>',
+        lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+        crown: '<path d="M3 7.5 6.5 11 12 4.5 17.5 11 21 7.5 19.4 18.5H4.6z"/><path d="M4.6 18.5h14.8"/>',
+        sword: '<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/>',
+        shield: '<path d="M12 21.5c4.4-2.1 7-5.4 7-9.5V5.4L12 2.8 5 5.4V12c0 4.1 2.6 7.4 7 9.5z"/>',
+        check: '<path d="M5 12.5 9.5 17 19 7.5"/>'
+      };
+
+      function icon(name, size) {
+        return '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+          'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" ' +
+          'width="' + size + '" height="' + size + '">' + ICONS[name] + '</svg>';
+      }
+
+      var state = { current: 'general', reply: null, collapsed: {} };
+      var $ = function (id) { return document.getElementById(id); };
+
+      function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+      }
+
+      function initial(user) { return user.name.charAt(0).toUpperCase(); }
+
+      function badgeFor(roleKey, size) {
+        var role = ROLES[roleKey];
+        if (!role || !role.icon) return '';
+        var cls = roleKey === 'admin' ? 'admin' : roleKey;
+        return '<span class="member-badge badge-' + cls + '" title="' + role.label + '">' + icon(role.icon, size) + '</span>';
+      }
+
+      // ---- Text: blocks of paragraphs and code, split into segments ----
+
+      var INLINE = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|~~[^~]+~~|\|\|[^|]+?\|\||@\w+|#[\w-]+)/g;
+
+      function segment(token) {
+        var first = token.charAt(0);
+        if (first === '`') return '<span class="seg"><code class="inline-code">' + esc(token.slice(1, -1)) + '</code></span>';
+        if (token.slice(0, 2) === '**') return '<span class="seg bold">' + esc(token.slice(2, -2)) + '</span>';
+        if (token.slice(0, 2) === '~~') return '<span class="seg strike">' + esc(token.slice(2, -2)) + '</span>';
+        if (token.slice(0, 2) === '||') return '<span class="seg spoiler">' + esc(token.slice(2, -2)) + '</span>';
+        if (first === '*') return '<span class="seg italic">' + esc(token.slice(1, -1)) + '</span>';
+        if (first === '@') {
+          var user = USERS[token.slice(1).toLowerCase()];
+          if (user) {
+            return '<span class="seg"><button type="button" class="mention" title="@' + esc(user.username) +
+              '" data-u="' + user.username + '">@' + esc(user.name) + '</button></span>';
+          }
+        }
+        if (first === '#') {
+          var chId = token.slice(1);
+          if (CHANNELS[chId]) {
+            return '<span class="seg"><button type="button" class="channel-mention" title="#' + esc(chId) +
+              '" data-ch="' + chId + '">#' + esc(chId) + '</button></span>';
+          }
+        }
+        return '<span class="seg">' + esc(token) + '</span>';
+      }
+
+      function inline(text) {
+        var parts = text.split(INLINE);
+        var out = '';
+        for (var i = 0; i < parts.length; i++) {
+          var part = parts[i];
+          if (!part) continue;
+          out += (i % 2 === 1) ? segment(part) : '<span class="seg">' + esc(part) + '</span>';
+        }
+        return out;
+      }
+
+      function paragraphs(out, raw) {
+        raw = raw.replace(/^\n+|\n+$/g, '');
+        if (!raw) return;
+        raw.split(/\n{2,}/).forEach(function (p) {
+          if (p.trim() !== '') out.push('<p class="paragraph">' + inline(p) + '</p>');
+        });
+      }
+
+      function renderContent(text) {
+        var out = [];
+        var re = /```([a-zA-Z0-9+#_-]*)\n?([\s\S]*?)```/g;
+        var last = 0;
+        var m;
+        while ((m = re.exec(text)) !== null) {
+          if (m.index > last) paragraphs(out, text.slice(last, m.index));
+          out.push('<div class="code-block-frame"><pre class="code-block"><code class="hljs">' +
+            esc(m[2].replace(/\n$/, '')) + '</code></pre>' +
+            '<button type="button" class="code-copy" title="Copy code">Copy</button></div>');
+          last = re.lastIndex;
+        }
+        if (last < text.length) paragraphs(out, text.slice(last));
+        return out.join('');
+      }
+
+      // ---- Sidebar ----
+
+      function channelRow(ch) {
+        var active = state.current === ch.id;
+        var unread = ch.unread && !active;
+        var hash = ch.discord ? icon('link', 15) : '#';
+        var tail = '';
+        if (ch.mention) tail += '<span class="mention-pill">' + ch.mention + '</span>';
+        if (ch.locked) tail += '<span class="lock" title="Only members with a certain role can see this">' + icon('lock', 13) + '</span>';
+        return '<div class="channel-item' + (active ? ' active' : '') + '">' +
+          '<button type="button" class="channel' + (active ? ' active' : '') + (unread ? ' unread' : '') + '" data-ch="' + ch.id + '">' +
+          '<span class="hash">' + hash + '</span><span class="channel-label">' + esc(ch.name) + '</span>' +
+          '<span class="tail">' + tail + '</span></button>' +
+          '<button class="channel-more" type="button" title="More options" aria-label="Options for #' + esc(ch.name) + '">' + icon('more', 16) + '</button>' +
+          '</div>';
+      }
+
+      function drawChannels() {
+        $('channels').innerHTML = CATS.map(function (cat) {
+          var collapsed = !!state.collapsed[cat.id];
+          return '<div class="category' + (collapsed ? ' collapsed' : '') + '">' +
+            '<div class="category-header">' +
+            '<button class="category-name" type="button" aria-expanded="' + String(!collapsed) + '" data-cat="' + cat.id + '">' +
+            '<span class="chevron">' + icon('chevron', 12) + '</span><span class="category-label">' + esc(cat.name) + '</span></button>' +
+            '<button class="channel-more" type="button" title="More options" aria-label="Options for ' + esc(cat.name) + '">' + icon('more', 16) + '</button>' +
+            '</div>' +
+            (collapsed ? '' : cat.channels.map(channelRow).join('')) +
+            '</div>';
+        }).join('');
+      }
+
+      // ---- Roster ----
+
+      function rosterMember(key) {
+        var u = USERS[key];
+        return '<button type="button" class="roster-member' + (u.online ? '' : ' offline') + '" data-u="' + key + '">' +
+          '<span class="avatar small fallback">' + initial(u) + '</span>' +
+          '<span class="roster-name">' + esc(u.name) + '</span>' +
+          badgeFor(u.role, 12) +
+          (u.discordId ? '<span class="roster-linked linked-account" title="Linked to a Discord account">' + icon('check', 12) + '</span>' : '') +
+          '</button>';
+      }
+
+      function drawRoster() {
+        var keys = Object.keys(USERS);
+        function group(label, list) {
+          if (!list.length) return '';
+          return '<div class="roster-group"><span class="roster-group-name">' + label + ' — ' + list.length + '</span>' +
+            list.map(rosterMember).join('') + '</div>';
+        }
+        $('roster').innerHTML =
+          group('Online', keys.filter(function (k) { return USERS[k].online; })) +
+          group('Offline', keys.filter(function (k) { return !USERS[k].online; }));
+      }
+
+      // ---- Messages ----
+
+      var ACTIONS =
+        '<div class="message-actions">' +
+        '<button type="button" title="Reply" data-reply="%I%">Reply</button>' +
+        '<button type="button" title="Add reaction" data-react="%I%">React</button>' +
+        '<button type="button" title="Pin">Pin</button>' +
+        '<button type="button" title="Save message" aria-label="Save message">Save</button>' +
+        '<span class="remind-action"><button type="button" title="Remind me" aria-expanded="false">Remind</button></span>' +
+        '<button type="button" title="Edit">Edit</button>' +
+        '<button type="button" title="Delete">Delete</button>' +
+        '</div>';
+
+      function messageHTML(m, i, grouped) {
+        var u = USERS[m.u];
+        var role = ROLES[u.role];
+        var authorStyle = role.color ? ' style="color:' + role.color + '"' : '';
+
+        var avatar = grouped
+          ? '<div class="avatar-spacer" aria-hidden="true"><span class="gutter-time">' + m.t + '</span></div>'
+          : '<button type="button" class="avatar fallback" aria-label="' + esc(u.name) + '" data-u="' + m.u + '">' + initial(u) + '</button>';
+
+        var meta = grouped ? '' :
+          '<div class="meta"><button type="button" class="author" data-u="' + m.u + '"' + authorStyle + '>' + esc(u.name) + '</button>' +
+          badgeFor(u.role, 15) + '<time>' + m.t + '</time></div>';
+
+        var reply = m.reply
+          ? '<div class="reply-ref"><span class="reply-author">' + esc(USERS[m.reply.u].name) + '</span>' +
+            '<span class="reply-text">' + esc(m.reply.text) + '</span></div>'
+          : '';
+
+        var reactions = (m.r && m.r.length)
+          ? '<div class="reactions">' + m.r.map(function (r, j) {
+              return '<button type="button" class="reaction' + (r[2] ? ' me' : '') + '" data-i="' + i + '" data-j="' + j + '"' +
+                ' title="' + (r[2] ? 'Remove your reaction' : 'Add reaction') + '">' +
+                '<span class="reaction-emoji">' + r[0] + '</span>' +
+                '<span class="reaction-count">' + (r[1] + (r[2] ? 1 : 0)) + '</span></button>';
+            }).join('') + '</div>'
+          : '';
+
+        var embed = m.embed
+          ? '<a class="embed" href="https://www.youtube.com" target="_blank" rel="noreferrer noopener">' +
+            '<span class="embed-site">YouTube</span>' +
+            '<span class="embed-title">Official trailer - season 2</span>' +
+            '<span class="embed-description">Two minutes in and nobody in this chat is okay. Saturday cannot come soon enough.</span></a>'
+          : '';
+
+        var mentionsMe = m.x.indexOf('@' + ME) !== -1;
+
+        return '<article class="message' + (grouped ? ' grouped' : '') + (mentionsMe ? ' mentions-me' : '') + '" data-i="' + i + '">' +
+          avatar +
+          '<div class="body">' + reply + meta +
+          '<div class="content">' + renderContent(m.x) + '</div>' +
+          embed + reactions + '</div>' +
+          ACTIONS.replace(/%I%/g, String(i)) +
+          '</article>';
+      }
+
+      function drawMessages() {
+        var ch = CHANNELS[state.current];
+        var list = MSGS[state.current] || [];
+        var locked = !!(ch && ch.locked);
+
+        $('chat').setAttribute('aria-label', '#' + state.current);
+        $('title').textContent = '# ' + state.current;
+
+        var input = $('input');
+        input.disabled = locked;
+        input.placeholder = locked ? "You can't post in this channel" : 'Message #' + state.current;
+
+        var prev = null;
+        $('messages').innerHTML = list.map(function (m, i) {
+          var grouped = prev === m.u && !m.reply;
+          prev = m.u;
+          return messageHTML(m, i, grouped);
+        }).join('');
+
+        var box = $('messages');
+        box.scrollTop = box.scrollHeight;
+      }
+
+      function drawReplyBar() {
+        var r = state.reply;
+        $('replying').innerHTML = r
+          ? '<div class="replying"><span class="muted">Replying to <strong>' + esc(USERS[r.u].name) + '</strong></span>' +
+            '<button type="button" class="remove-reply" title="Cancel reply" data-x-reply>×</button></div>'
+          : '';
+      }
+
+      function openChannel(id) {
+        if (!CHANNELS[id]) return;
+        state.current = id;
+        state.reply = null;
+        CHANNELS[id].unread = false;
+        CHANNELS[id].mention = 0;
+        drawChannels();
+        drawMessages();
+        drawReplyBar();
+        closeDrawers();
+      }
+
+      // ---- Profile card, mirroring the app's ProfileCard.svelte ----
+
+      function gradientFor(hex) {
+        if (!hex) return 'var(--h-accent-gradient)';
+        return 'linear-gradient(135deg, ' + hex + ' 0%, color-mix(in srgb, ' + hex + ' 55%, #8c70f4) 100%)';
+      }
+
+      function showProfile(key, anchor) {
+        closeProfile();
+        var u = USERS[key];
+        var role = ROLES[u.role];
+
+        var roles = u.roles.map(function (r) {
+          return '<span class="role-chip"><span class="role-dot" style="background:' + (r[1] || 'var(--h-text-muted)') + '"></span>' + r[0] + '</span>';
+        }).join('');
+
+        var fields =
+          '<div class="profile-card-fields">' +
+          '<div class="profile-field"><span class="profile-field-label">Member since</span><span>' + esc(u.since) + '</span></div>' +
+          (u.discordId ? '<div class="profile-field"><span class="profile-field-label">Discord</span><code class="profile-field-value">' + esc(u.discordId) + '</code></div>' : '') +
+          '</div>';
+
+        var el = document.createElement('div');
+        el.className = 'profile-card';
+        el.id = 'pc';
+        el.setAttribute('role', 'dialog');
+        el.setAttribute('tabindex', '-1');
+        el.setAttribute('aria-label', u.name + ' profile');
+        el.innerHTML =
+          '<div class="profile-card-banner" style="background:' + gradientFor(role.color) + '"></div>' +
+          '<div class="profile-card-body">' +
+            '<div class="profile-card-avatar-wrap"><span class="avatar large fallback">' + initial(u) + '</span></div>' +
+            '<div class="profile-card-names"><strong>' + esc(u.name) + badgeFor(u.role, 14) +
+              (u.discordId ? '<span class="card-linked linked-account" title="Linked to a Discord account">' + icon('check', 13) + '</span>' : '') +
+            '</strong><span class="muted">@' + esc(u.username) + '</span></div>' +
+            fields +
+            '<div class="profile-card-roles"><span class="profile-field-label">Roles</span>' +
+            '<div class="profile-roles">' + roles + '</div></div>' +
+          '</div>';
+        document.body.appendChild(el);
+
+        var r = anchor.getBoundingClientRect();
+        var x = r.left;
+        if (x + el.offsetWidth > window.innerWidth - 8) x = window.innerWidth - 8 - el.offsetWidth;
+        if (x < 8) x = 8;
+        var y = r.bottom + 6;
+        if (y + el.offsetHeight > window.innerHeight - 8) y = r.top - 6 - el.offsetHeight;
+        if (y < 8) y = 8;
+        el.style.left = Math.round(x) + 'px';
+        el.style.top = Math.round(y) + 'px';
+      }
+
+      function closeProfile() {
+        var c = document.getElementById('pc');
+        if (c) c.remove();
+      }
+
+      function closeDrawers() {
+        $('sidebar').classList.remove('open');
+        $('roster').classList.remove('open');
+        $('toggle-channels').setAttribute('aria-expanded', 'false');
+        $('toggle-members').setAttribute('aria-expanded', 'false');
+      }
+
+      function toggleDrawer(which) {
+        var open, target;
+        if (which === 'channels') {
+          open = !$('sidebar').classList.contains('open');
+          closeDrawers();
+          $('sidebar').classList.toggle('open', open);
+          $('toggle-channels').setAttribute('aria-expanded', String(open));
+        } else {
+          open = !$('roster').classList.contains('open');
+          closeDrawers();
+          $('roster').classList.toggle('open', open);
+          $('toggle-members').setAttribute('aria-expanded', String(open));
+        }
+        closeProfile();
+      }
+
+      // ---- Events ----
+
+      document.addEventListener('click', function (e) {
+        var t = e.target;
+
+        var cat = t.closest('[data-cat]');
+        if (cat) {
+          var id = cat.getAttribute('data-cat');
+          state.collapsed[id] = !state.collapsed[id];
+          drawChannels();
+          return;
+        }
+
+        var ch = t.closest('[data-ch]');
+        if (ch) { openChannel(ch.getAttribute('data-ch')); return; }
+
+        var member = t.closest('[data-u]');
+        if (member) { e.preventDefault(); showProfile(member.getAttribute('data-u'), member); return; }
+
+        var spoiler = t.closest('.seg.spoiler');
+        if (spoiler) { spoiler.classList.toggle('on'); return; }
+
+        var reaction = t.closest('.reaction');
+        if (reaction) {
+          var r = MSGS[state.current][+reaction.getAttribute('data-i')].r[+reaction.getAttribute('data-j')];
+          r[2] = r[2] ? 0 : 1;
+          drawMessages();
+          return;
+        }
+
+        var replyBtn = t.closest('[data-reply]');
+        if (replyBtn) {
+          var m = MSGS[state.current][+replyBtn.getAttribute('data-reply')];
+          state.reply = { u: m.u, text: m.x.replace(/[*`|~]/g, '') };
+          drawReplyBar();
+          $('input').focus();
+          return;
+        }
+
+        var reactBtn = t.closest('[data-react]');
+        if (reactBtn) {
+          var target = MSGS[state.current][+reactBtn.getAttribute('data-react')];
+          target.r = target.r || [];
+          var existing = target.r.filter(function (x) { return x[0] === '👍'; })[0];
+          if (existing) existing[2] = existing[2] ? 0 : 1;
+          else target.r.push(['👍', 0, 1]);
+          drawMessages();
+          return;
+        }
+
+        var copy = t.closest('.code-copy');
+        if (copy) {
+          var code = copy.parentNode.querySelector('code');
+          if (code && navigator.clipboard) navigator.clipboard.writeText(code.textContent).catch(function () {});
+          var label = copy.textContent;
+          copy.textContent = 'Copied';
+          setTimeout(function () { copy.textContent = label; }, 1400);
+          return;
+        }
+
+        if (t.closest('[data-x-reply]')) { state.reply = null; drawReplyBar(); return; }
+
+        if (t.closest('#toggle-channels')) { toggleDrawer('channels'); return; }
+        if (t.closest('#toggle-members')) { toggleDrawer('members'); return; }
+
+        if (!t.closest('#sidebar') && !t.closest('#toggle-channels')) $('sidebar').classList.remove('open');
+        if (!t.closest('#roster') && !t.closest('#toggle-members')) $('roster').classList.remove('open');
+        if (!t.closest('#pc')) closeProfile();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeProfile(); closeDrawers(); }
+      });
+
+      $('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var input = $('input');
+        var v = input.value.trim();
+        if (!v) return;
+        var m = { u: ME, t: 'Just now', x: v };
+        if (state.reply) m.reply = { u: state.reply.u, text: state.reply.text };
+        (MSGS[state.current] = MSGS[state.current] || []).push(m);
+        state.reply = null;
+        input.value = '';
+        input.style.height = '';
+        drawReplyBar();
+        drawMessages();
+      });
+
+      var input = $('input');
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('form').requestSubmit(); }
+      });
+      input.addEventListener('input', function () {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+      });
+
+      drawChannels();
+      drawRoster();
+      drawMessages();
+      drawReplyBar();
+    })();
+  </script>
+
+  <script>
+    // Kept separate from the demo so a demo script failure can never hide the
+    // page: reveals are armed only here, as one of the last things to run.
+    (function () {
+      var reveals = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) {
+        reveals.forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+        });
+      }, { rootMargin: '0px 0px -10% 0px' });
+      reveals.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</body>
+</html>
