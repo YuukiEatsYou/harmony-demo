@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>document.documentElement.className += ' js';</script>
   <title>Harmony - a chat server you run yourself</title>
-  <meta name="description" content="Self-hosted Discord alternative with a built-in bridge, so nobody has to leave Discord behind. Channels, roles, reactions, custom emoji, images and video. All on a machine you own.">
+  <meta name="description" content="Self-hosted Discord alternative with a built-in bridge, so nobody has to leave Discord behind. Channels, roles, reactions, custom emoji, images and video, plus voice chat with screen sharing. All on a machine you own.">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#12151a">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Harmony - a chat server you run yourself">
-  <meta property="og:description" content="Self-hosted Discord alternative with a built-in bridge, so nobody has to leave Discord behind.">
+  <meta property="og:description" content="Self-hosted Discord alternative with a built-in bridge, so nobody has to leave Discord behind. Now with voice chat and screen sharing.">
   <meta property="og:image" content="icon.png">
   <meta name="twitter:card" content="summary_large_image">
 
@@ -76,9 +76,10 @@
         <div class="hero-copy">
           <h1>A chat server you actually own.</h1>
           <p class="hero-sub">
-            Channels, roles, reactions, custom emoji, images and video. Everything a small
-            community used from Discord, running on a machine you control. A built-in bridge
-            keeps Discord in the loop, so nobody has to leave.
+            Channels, roles, reactions, custom emoji, images and video — plus voice chat
+            with screen sharing. Everything a small community used from Discord, running on a
+            machine you control. A built-in bridge keeps Discord in the loop, so nobody has to
+            leave.
           </p>
           <div class="hero-cta">
             <a class="button-link" href="#demo">Try the live demo</a>
@@ -89,6 +90,7 @@
             <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Single process</span>
             <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>No Docker</span>
             <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Discord bridge</span>
+            <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Voice chat &amp; screen sharing</span>
             <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Installs as an app</span>
           </div>
         </div>
@@ -134,8 +136,8 @@
 
         <div class="status reveal">
           <strong style="color:var(--h-text)">What it isn't.</strong>
-          There is no voice or video chat, no direct messages and no friend list. One instance is one
-          server. It is built to be <em>a</em> home for <em>a</em> community, not a platform.
+          There are no direct messages and no friend list. One instance is one server. It is built to
+          be <em>a</em> home for <em>a</em> community, not a platform.
         </div>
 
         <h3 style="margin:2.75rem 0 1rem;font-size:1.05rem">Everything a small server needs</h3>
@@ -147,6 +149,8 @@
           <span class="pill">Polls</span>
           <span class="pill">Custom emoji</span>
           <span class="pill">Images &amp; video</span>
+          <span class="pill">Voice chat</span>
+          <span class="pill">Screen sharing</span>
           <span class="pill">Invites</span>
           <span class="pill">Per-channel slowmode</span>
           <span class="pill">Search with filters</span>
@@ -284,6 +288,13 @@ HARMONY_COOKIE_SECURE=true</span><button class="copy" type="button">Copy</button
           </li>
 
           <li class="reveal">
+            <h3>Open the voice ports</h3>
+            <p>Voice chat is optional and needs UDP, which the HTTPS connection the rest of Harmony uses cannot carry. The media relay sends audio straight to the Node process, so your reverse proxy needs no changes, but the range has to be open on the host and in your provider's firewall:</p>
+            <div class="term"><span class="term-code">sudo ufw allow 40000:40100/udp</span><button class="copy" type="button">Copy</button></div>
+            <p>The default range holds about a dozen simultaneous connections. Widen it with <code>HARMONY_VOICE_PORT_MIN</code> and <code>HARMONY_VOICE_PORT_MAX</code> for larger or busier rooms, and set <code>HARMONY_VOICE_PUBLIC_IP</code> if the host sits behind another NAT.</p>
+          </li>
+
+          <li class="reveal">
             <h3>Back it up</h3>
             <p>Everything that matters is in <code>data/</code>. Copy it while stopped, or take a consistent copy while running:</p>
             <div class="term"><span class="term-code">sqlite3 data/harmony.db ".backup '/backup/harmony.db'"
@@ -301,11 +312,13 @@ cp -a data/uploads /backup/uploads</span><button class="copy" type="button">Copy
             <tr><td><code>HARMONY_DATA_DIR</code></td><td><code>./data</code></td><td>Where the database and uploads live.</td></tr>
             <tr><td><code>HARMONY_REQUIRE_INVITE</code></td><td><code>false</code></td><td>Require an invite code to register.</td></tr>
             <tr><td><code>HARMONY_SESSION_TTL_DAYS</code></td><td><code>30</code></td><td>How long a login lasts.</td></tr>
+            <tr><td><code>HARMONY_VOICE_PORT_MIN</code></td><td><code>40000</code></td><td>Low end of the UDP range voice chat uses.</td></tr>
+            <tr><td><code>HARMONY_VOICE_PORT_MAX</code></td><td><code>40100</code></td><td>High end of the UDP range. Open it on the host and in your provider's firewall.</td></tr>
           </tbody>
         </table>
 
         <p class="sec-lede" style="margin:1.5rem 0 0">
-          The full guide covers nginx, systemd, updates and the Discord bridge in
+          The full guide covers nginx, systemd, updates, the Discord bridge and voice in
           <a href="https://github.com/YuukiEatsYou/harmony/blob/main/docs/DEPLOYMENT.md">docs/DEPLOYMENT.md</a>.
         </p>
       </div>
@@ -849,9 +862,9 @@ cp -a data/uploads /backup/uploads</span><button class="copy" type="button">Copy
           return;
         }
 
-        var copy = t.closest('.code-copy');
+        var copy = t.closest('.code-copy, .copy');
         if (copy) {
-          var code = copy.parentNode.querySelector('code');
+          var code = copy.parentNode.querySelector('code, .term-code');
           if (code && navigator.clipboard) navigator.clipboard.writeText(code.textContent).catch(function () {});
           var label = copy.textContent;
           copy.textContent = 'Copied';

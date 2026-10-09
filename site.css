@@ -669,4 +669,16 @@ html.js .reveal.in {
   .sec {
     padding: 3.5rem 0;
   }
+
+  /* Long variable names must wrap on narrow screens instead of widening the
+     table (and the whole page) past the viewport. */
+  .site th,
+  .site td {
+    padding: .5rem .6rem;
+  }
+
+  .site td code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
